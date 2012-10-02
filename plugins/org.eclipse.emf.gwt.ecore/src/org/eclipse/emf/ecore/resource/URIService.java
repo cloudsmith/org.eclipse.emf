@@ -21,6 +21,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("uriService")
 public interface URIService extends RemoteService
 {
+  String OPTION_SESSION = "SESSION";
+
   Map<?, ?> fetch(String uri, Map<?, ?> options);
   Map<?, ?> store(String uri, byte[] bytes, Map<?, ?> options);
   Map<?, ?> delete(String uri, Map<?, ?> options);
