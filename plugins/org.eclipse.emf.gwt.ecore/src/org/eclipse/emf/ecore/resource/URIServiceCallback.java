@@ -26,147 +26,167 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class URIServiceCallback extends URIHandlerImpl
 {
-  protected URIServiceAsync uriService;
-  
-  public URIServiceCallback(URIServiceAsync uriService)
-  {
-    this.uriService = uriService;
-  }
+	protected URIServiceAsync uriService;
 
-  @Override
-  public void createInputStream(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
-  {
-    HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
-    massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
-    uriService.fetch
-      (uri.toString(), 
-       massagedOptions, 
-       new AsyncCallback<Map<?, ?>>()
-       {
-         public void onFailure(Throwable caught)
-         {
-           callback.onFailure(caught);
-         }
- 
-         public void onSuccess(Map<?, ?> result)
-         {
-           @SuppressWarnings("unchecked")
-           Map<String, Object> response = (Map<String, Object>)result.get(URIConverter.OPTION_RESPONSE);
-   	       Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
-   	       if (responseResult == null)
-           {
-             callback.onFailure(new IOException("Stream for '" + uri + "' not found"));
-           }
-   	       else if (responseResult instanceof byte[])
-           {
-             byte[] bytes = (byte[])responseResult;
-             response.put(URIConverter.RESPONSE_RESULT, new ByteArrayInputStream(bytes));
-             callback.onSuccess(result);
-           }
-           else
-           {
-       	     callback.onFailure((IOException)responseResult);
-           }
-         }
-       });
-  }
+	public URIServiceCallback(URIServiceAsync uriService)
+	{
+		this.uriService = uriService;
+	}
 
-  @Override
-  public void store(URI uri, byte[] bytes, Map<?, ?> options, final Callback<Map<?, ?>> callback)
-  {
-    HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
-    massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
-    uriService.store
-      (uri.toString(), 
-       bytes,
-       massagedOptions, 
-       new AsyncCallback<Map<?, ?>>()
-       {
-         public void onFailure(Throwable caught)
-         {
-           callback.onFailure(caught);
-         }
- 
-         public void onSuccess(Map<?, ?> result)
-         {
-           @SuppressWarnings("unchecked")
-           Map<String, Object> response = (Map<String, Object>)result.get(URIConverter.OPTION_RESPONSE);
-           Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
-           if (responseResult instanceof Throwable)
-           {
-             callback.onFailure((Throwable)responseResult);
-           }
-           else
-           {
-             callback.onSuccess(result);
-           }
-         }
-       });
-  }
-  
-  @Override
-  public void delete(URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
-  {
-    HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
-    massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
-    @SuppressWarnings("unchecked")
-    Map<String, Object> response = (Map<String, Object>)massagedOptions.get(URIConverter.OPTION_RESPONSE);
-    if (response == null)
-    {
-      massagedOptions.put(URIConverter.OPTION_RESPONSE, new HashMap<Object, Object>());
-    }
-    uriService.delete
-      (uri.toString(), 
-       massagedOptions, 
-       new AsyncCallback<Map<?, ?>>()
-       {
-         public void onFailure(Throwable caught)
-         {
-           callback.onFailure(caught);
-         }
- 
-         public void onSuccess(Map<?, ?> result)
-         {
-           @SuppressWarnings("unchecked")
-           Map<String, Object> response = (Map<String, Object>)result.get(URIConverter.OPTION_RESPONSE);
-           Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
-           if (responseResult instanceof Throwable)
-           {
-             callback.onFailure((Throwable)responseResult);
-           }
-           else
-           {
-             callback.onSuccess(result);
-           }
-         }
-       });
-  }
+	@Override
+	public void createInputStream(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+	{
+		HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
+		massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
+		uriService.fetch(uri.toString(), massagedOptions, new AsyncCallback<Map<?, ?>>()
+		{
+			public void onFailure(Throwable caught)
+			{
+				callback.onFailure(caught);
+			}
 
-  @Override
-  public void exists(URI uri, Map<?, ?> options, final Callback<Boolean> callback)
-  {
-    HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
-    massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
-    @SuppressWarnings("unchecked")
-    Map<String, Object> response = (Map<String, Object>)massagedOptions.get(URIConverter.OPTION_RESPONSE);
-    if (response == null)
-    {
-      massagedOptions.put(URIConverter.OPTION_RESPONSE, new HashMap<Object, Object>());
-    }
-    uriService.exists
-      (uri.toString(), 
-       massagedOptions, 
-       new AsyncCallback<Boolean>()
-       {
-         public void onFailure(Throwable caught)
-         {
-           callback.onFailure(caught);
-         }
- 
-         public void onSuccess(Boolean result)
-         {
-           callback.onSuccess(result);
-         }
-       });
-  }
+			public void onSuccess(Map<?, ?> result)
+			{
+				@SuppressWarnings("unchecked")
+				Map<String, Object> response = (Map<String, Object>) result.get(URIConverter.OPTION_RESPONSE);
+				Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
+				if (responseResult == null)
+				{
+					callback.onFailure(new IOException("Stream for '" + uri + "' not found"));
+				}
+				else if (responseResult instanceof byte[])
+				{
+					byte[] bytes = (byte[]) responseResult;
+					response.put(URIConverter.RESPONSE_RESULT, new ByteArrayInputStream(bytes));
+					callback.onSuccess(result);
+				}
+				else
+				{
+					callback.onFailure((IOException) responseResult);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void createJSON(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+	{
+		HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
+		massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
+		uriService.fetch(uri.toString(), massagedOptions, new AsyncCallback<Map<?, ?>>()
+		{
+			public void onFailure(Throwable caught)
+			{
+				callback.onFailure(caught);
+			}
+
+			public void onSuccess(Map<?, ?> result)
+			{
+				@SuppressWarnings("unchecked")
+				Map<String, Object> response = (Map<String, Object>) result.get(URIConverter.OPTION_RESPONSE);
+				Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
+				if (responseResult == null)
+				{
+					callback.onFailure(new IOException("Stream for '" + uri + "' not found"));
+				}
+				else if (responseResult instanceof String)
+				{
+					callback.onSuccess(result);
+				}
+				else
+				{
+					callback.onFailure((IOException) responseResult);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void store(URI uri, String json, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+	{
+		HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
+		massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
+		uriService.store(uri.toString(), json, massagedOptions, new AsyncCallback<Map<?, ?>>()
+		{
+			public void onFailure(Throwable caught)
+			{
+				callback.onFailure(caught);
+			}
+
+			public void onSuccess(Map<?, ?> result)
+			{
+				@SuppressWarnings("unchecked")
+				Map<String, Object> response = (Map<String, Object>) result.get(URIConverter.OPTION_RESPONSE);
+				Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
+				if (responseResult instanceof Throwable)
+				{
+					callback.onFailure((Throwable) responseResult);
+				}
+				else
+				{
+					callback.onSuccess(result);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void delete(URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+	{
+		HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
+		massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> response = (Map<String, Object>) massagedOptions.get(URIConverter.OPTION_RESPONSE);
+		if (response == null)
+		{
+			massagedOptions.put(URIConverter.OPTION_RESPONSE, new HashMap<Object, Object>());
+		}
+		uriService.delete(uri.toString(), massagedOptions, new AsyncCallback<Map<?, ?>>()
+		{
+			public void onFailure(Throwable caught)
+			{
+				callback.onFailure(caught);
+			}
+
+			public void onSuccess(Map<?, ?> result)
+			{
+				@SuppressWarnings("unchecked")
+				Map<String, Object> response = (Map<String, Object>) result.get(URIConverter.OPTION_RESPONSE);
+				Object responseResult = response.get(URIConverter.RESPONSE_RESULT);
+				if (responseResult instanceof Throwable)
+				{
+					callback.onFailure((Throwable) responseResult);
+				}
+				else
+				{
+					callback.onSuccess(result);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void exists(URI uri, Map<?, ?> options, final Callback<Boolean> callback)
+	{
+		HashMap<Object, Object> massagedOptions = new HashMap<Object, Object>(options);
+		massagedOptions.remove(URIConverter.OPTION_URI_CONVERTER);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> response = (Map<String, Object>) massagedOptions.get(URIConverter.OPTION_RESPONSE);
+		if (response == null)
+		{
+			massagedOptions.put(URIConverter.OPTION_RESPONSE, new HashMap<Object, Object>());
+		}
+		uriService.exists(uri.toString(), massagedOptions, new AsyncCallback<Boolean>()
+		{
+			public void onFailure(Throwable caught)
+			{
+				callback.onFailure(caught);
+			}
+
+			public void onSuccess(Boolean result)
+			{
+				callback.onSuccess(result);
+			}
+		});
+	}
 }

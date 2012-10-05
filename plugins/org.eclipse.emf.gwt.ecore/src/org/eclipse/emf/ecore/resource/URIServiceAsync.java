@@ -23,7 +23,7 @@ public interface URIServiceAsync
 {
   void fetch(String uri, Map<?, ?> options, AsyncCallback<Map<?, ?>> callback);
 
-  void store(String uri, byte[] bytes, Map<?, ?> options, AsyncCallback<Map<?, ?>> callback);
+  void store(String uri, String json, Map<?, ?> options, AsyncCallback<Map<?, ?>> callback);
 
   void whiteList(URIService.WhiteList whiteList, AsyncCallback<URIService.WhiteList> callback);
 

@@ -12,6 +12,7 @@ Export-Package: org.eclipse.emf.ecore,
  org.eclipse.emf.ecore.plugin,
  org.eclipse.emf.ecore.resource,
  org.eclipse.emf.ecore.resource.impl,
+ org.eclipse.emf.ecore.resource.server,
  org.eclipse.emf.ecore.util,
  org.eclipse.emf.ecore.xml.namespace,
  org.eclipse.emf.ecore.xml.namespace.impl,
@@ -19,9 +20,9 @@ Export-Package: org.eclipse.emf.ecore,
  org.eclipse.emf.ecore.xml.type,
  org.eclipse.emf.ecore.xml.type.impl,
  org.eclipse.emf.ecore.xml.type.internal,
- org.eclipse.emf.ecore.xml.type.util,
- org.eclipse.emf.server.ecore.resource
+ org.eclipse.emf.ecore.xml.type.util
 Require-Bundle: org.eclipse.emf.gwt.common;visibility:=reexport
 Eclipse-BuddyPolicy: dependent
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
+Import-Package: com.google.gson;version="2.1.0"

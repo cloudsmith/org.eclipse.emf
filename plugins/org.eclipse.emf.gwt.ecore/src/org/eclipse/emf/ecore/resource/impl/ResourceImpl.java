@@ -11,15 +11,15 @@
 package org.eclipse.emf.ecore.resource.impl;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
@@ -965,11 +965,21 @@ public class ResourceImpl extends NotifierImpl implements Resource, Resource.Int
   {
     save(options, null);
   }
+  
+  public void fromJson(String jsonString, Map<?, ?> options) throws IOException {
+  	// If this happens it's likely that a BinaryResourceImpl is used in the browser.
+  	throw new UnsupportedOperationException();
+  }
 
+  public String toJson(Map<?, ?> options) throws IOException {
+  	// If this happens it's likely that a BinaryResourceImpl is used in the browser.
+  	throw new UnsupportedOperationException();
+  }
+ 
   /*
    * Javadoc copied from interface.
    */
-  public void save(Map<?, ?> options, final Callback<Resource> callback) throws IOException
+  public void save(final Map<?, ?> options, final Callback<Resource> callback) throws IOException
   {
     Map<?, ?> response = options == null ? null : (Map<?, ?>)options.get(URIConverter.OPTION_RESPONSE);
     if (response == null)
@@ -979,35 +989,22 @@ public class ResourceImpl extends NotifierImpl implements Resource, Resource.Int
     URIConverter uriConverter = getURIConverter();
     if (GWT.isClient())
     {
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      try
-      {
-        save(outputStream, options);
-      }
-      finally
-      {
-        outputStream.close();
-        byte[] bytes = outputStream.toByteArray();
-        final ExtensibleURIConverterImpl.OptionsMap effectiveOptions = new ExtensibleURIConverterImpl.OptionsMap(URIConverter.OPTION_RESPONSE, response, options);
-        uriConverter.store
-          (getURI(),
-           bytes,
-           effectiveOptions,
-           new Callback<Map<?,?>>()
-           {
-             public void onFailure(Throwable caught)
-             {
-               callback.onFailure(caught);
-             }
+  		Map<Object, Object> effectiveOptions = new HashMap<Object, Object>();
+  		effectiveOptions.put(URIConverter.OPTION_RESPONSE, response);
+  		if(options != null)
+  			effectiveOptions.putAll(options);
 
-             public void onSuccess(Map<?, ?> result)
-             {
-               Map<?, ?> response = (Map<?, ?>)result.get(URIConverter.OPTION_RESPONSE);
-               handleSaveResponse(response, effectiveOptions);
-               callback.onSuccess(ResourceImpl.this);
-             }
-           });
-      }
+  		uriConverter.store(getURI(), toJson(options), effectiveOptions, new Callback<Map<?, ?>>() {
+  			public void onFailure(Throwable caught) {
+  				callback.onFailure(caught);
+  			}
+
+  			public void onSuccess(Map<?, ?> result) {
+  				Map<?, ?> response = (Map<?, ?>) result.get(URIConverter.OPTION_RESPONSE);
+  				handleSaveResponse(response, options);
+  				callback.onSuccess(ResourceImpl.this);
+  			}
+  		});
     }
     else
     {
@@ -1072,80 +1069,77 @@ public class ResourceImpl extends NotifierImpl implements Resource, Resource.Int
           {
             loadingCallbacks.add(callback);
           }
-          final ExtensibleURIConverterImpl.OptionsMap effectiveOptions = new ExtensibleURIConverterImpl.OptionsMap(URIConverter.OPTION_RESPONSE, response, options);
-          uriConverter.createInputStream
-            (getURI(),
-             effectiveOptions,
-             new Callback<Map<?,?>>()
-              {
-                protected void dispatchOnFailure(Throwable caught)
-                {
-                  for (Callback<Resource> callback : loadingCallbacks)
-                  {
-                    callback.onFailure(caught);
-                  }
-                  loadingCallbacks = null;
-                }
+      		if(loadingCallbacks != null) {
+      			loadingCallbacks.add(callback);
+      			return;
+      		}
 
-                protected void dispatchOnSuccess(Resource resource)
-                {
-                  for (Callback<Resource> callback : loadingCallbacks)
-                  {
-                    callback.onSuccess(resource);
-                  }
-                  loadingCallbacks = null;
-                }
+      		isLoading = true;
+      		loadingCallbacks = new ArrayList<Callback<Resource>>();
+      		if(callback != null) {
+      			loadingCallbacks.add(callback);
+      		}
 
-                public void onFailure(Throwable caught)
-                {
-                  Notification notification = setLoaded(true);
-                  if (errors != null)
-                  {
-                    errors.clear();
-                  }
-                  if (warnings != null)
-                  {
-                    warnings.clear();
-                  }
-                  isLoading = false;
-                  if (notification != null)
-                  {
-                    eNotify(notification);
-                  }
-                  setModified(false);
-                  dispatchOnFailure(caught);
-                }
+      		final Map<Object, Object> effectiveOptions = new HashMap<Object, Object>();
+      		effectiveOptions.put(URIConverter.OPTION_RESPONSE, response);
+      		if(options != null)
+      			effectiveOptions.putAll(options);
 
-                public void onSuccess(Map<?, ?> result)
-                {
-                  Map<?, ?> response = (Map<?, ?>)result.get(URIConverter.OPTION_RESPONSE);
-                  InputStream inputStream = (InputStream)response.get(URIConverter.RESPONSE_RESULT);
-                  try
-                  {
-                    load(inputStream, options);
-                  }
-                  catch (IOException exception)
-                  {
-                    dispatchOnFailure(exception);
-                    return;
-                  }
-                  finally
-                  {
-                    isLoading = false;
-                    try
-                    {
-                      inputStream.close();
-                    }
-                    catch (IOException exception)
-                    {
-                      dispatchOnFailure(exception);
-                      return;
-                    }
-                    handleLoadResponse(response, effectiveOptions);
-                  }
-                  dispatchOnSuccess(ResourceImpl.this);
-                }
-              });
+      		uriConverter.createJSON(
+      			getURI(), effectiveOptions, new Callback<Map<?, ?>>() {
+      				protected void dispatchOnFailure(Throwable caught) {
+      					if(loadingCallbacks != null) {
+      						for(Callback<Resource> callback : loadingCallbacks) {
+      							if(callback != null)
+      								callback.onFailure(caught);
+      						}
+      						loadingCallbacks = null;
+      					}
+      				}
+
+      				protected void dispatchOnSuccess(Resource resource) {
+      					if(loadingCallbacks != null) {
+      						for(Callback<Resource> callback : loadingCallbacks) {
+      							if(callback != null)
+      								callback.onSuccess(resource);
+      						}
+      						loadingCallbacks = null;
+      					}
+      				}
+
+      				public void onFailure(Throwable caught) {
+      					Notification notification = setLoaded(true);
+      					if(errors != null) {
+      						errors.clear();
+      					}
+      					if(warnings != null) {
+      						warnings.clear();
+      					}
+      					isLoading = false;
+      					if(notification != null) {
+      						eNotify(notification);
+      					}
+      					setModified(false);
+      					dispatchOnFailure(caught);
+      				}
+
+      				public void onSuccess(Map<?, ?> result) {
+      					Map<?, ?> response = (Map<?, ?>) result.get(URIConverter.OPTION_RESPONSE);
+      					String jsonString = (String) response.get(URIConverter.RESPONSE_RESULT);
+      					try {
+      						fromJson(jsonString, options);
+      					}
+      					catch(IOException exception) {
+      						dispatchOnFailure(exception);
+      						return;
+      					}
+      					finally {
+      						isLoading = false;
+      						handleLoadResponse(response, effectiveOptions);
+      					}
+      					dispatchOnSuccess(ResourceImpl.this);
+      				}
+      			});
         }
         else if (callback != null)
         {

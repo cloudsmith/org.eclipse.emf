@@ -49,7 +49,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.BinaryIO;
 import org.eclipse.emf.ecore.util.EcoreValidator;
 import org.eclipse.emf.ecore.util.FeatureMap;
 
@@ -1115,7 +1115,7 @@ public class EcorePackageImpl extends EPackageImpl implements EcorePackage
    */
   public static class WhiteList implements IsSerializable, EBasicWhiteList
   {
-    protected BinaryResourceImpl.BinaryIO.Version binaryResourceVersion;
+    protected BinaryIO.Version binaryResourceVersion;
     protected IOException ioException;
 
     /**

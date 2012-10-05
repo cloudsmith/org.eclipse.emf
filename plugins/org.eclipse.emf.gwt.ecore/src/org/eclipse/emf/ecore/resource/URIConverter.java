@@ -222,6 +222,14 @@ public interface URIConverter
   void createInputStream(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback);
 
   /**
+   * TODO
+   * @param uri
+   * @param options
+   * @param callback
+   */
+	void createJSON(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback);
+
+  /**
    * An interface that is optionally implemented by the input streams returned from 
    * {@link URIConverter#createInputStream(URI)} and {@link URIConverter#createInputStream(URI, Map)}.
    * An input stream implementing this interface is highly unlikely to support {@link InputStream#read() read}.
@@ -265,11 +273,11 @@ public interface URIConverter
   /**
    * TODO
    * @param uri
-   * @param bytes
+   * @param json
    * @param options
    * @param callback
    */
-  void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback);
+  void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback);
 
   /**
    * An interface that is optionally implemented by the output streams returned from 

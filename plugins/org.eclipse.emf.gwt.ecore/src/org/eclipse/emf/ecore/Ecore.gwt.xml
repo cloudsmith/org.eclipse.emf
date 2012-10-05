@@ -3,10 +3,16 @@
 <module>
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="org.eclipse.emf.common.Common" />
+	<replace-with class="org.eclipse.emf.ecore.resource.client.JSONClientWrapper">
+		<when-type-is class="org.eclipse.emf.ecore.resource.JSONWrapper"/>
+	</replace-with>
 	<source path=""/>
 	<source path="impl"/>
 	<source path="plugin"/>
 	<source path="resource"/>
-	<source path="resource.impl"/>
+	<source path="resource.client"/>
+	<source path="resource.impl">
+		<exclude name="BinaryResourceImpl.*" />
+	</source>
 	<source path="util"/>
 </module>

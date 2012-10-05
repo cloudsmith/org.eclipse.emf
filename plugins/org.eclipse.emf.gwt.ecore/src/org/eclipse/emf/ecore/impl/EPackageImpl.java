@@ -11,7 +11,6 @@
 package org.eclipse.emf.ecore.impl;
 
 
-import com.google.gwt.user.client.rpc.GwtTransient;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,11 +45,13 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIService;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.JSONResourceImpl;
 import org.eclipse.emf.ecore.util.BasicExtendedMetaData;
 import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.eclipse.emf.ecore.util.InternalEList;
+
+import com.google.gwt.user.client.rpc.GwtTransient;
 
 
 /**
@@ -743,7 +744,7 @@ public class EPackageImpl extends ENamedElementImpl implements EPackage, BasicEx
         {
           public Resource createResource(URI uri)
           {
-            return new BinaryResourceImpl(uri);
+            return new JSONResourceImpl(uri);
           }
         };
       }

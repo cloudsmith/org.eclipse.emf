@@ -90,7 +90,7 @@ public class URIHandlerImpl implements URIHandler
     return null;
   }
 
-  public void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback)
+  public void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback)
   {
     callback.onSuccess(null);
   }
@@ -109,6 +109,11 @@ public class URIHandlerImpl implements URIHandler
   {
     callback.onSuccess(null);
   }
+
+	public void createJSON(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+	{
+    callback.onSuccess(null);
+	}
 
   /**
    * Only HTTP connections support delete.

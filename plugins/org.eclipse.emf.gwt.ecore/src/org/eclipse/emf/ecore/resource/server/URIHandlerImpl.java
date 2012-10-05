@@ -8,7 +8,7 @@
  * Contributors:
  *   IBM - Initial API and implementation
  */
-package org.eclipse.emf.server.ecore.resource;
+package org.eclipse.emf.ecore.resource.server;
 
 
 import java.io.ByteArrayInputStream;
@@ -409,10 +409,10 @@ public class URIHandlerImpl implements URIHandler
     throw new UnsupportedOperationException();
   }
 
-  public void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback)
-  {
+  public void createJSON(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
+	{
     throw new UnsupportedOperationException();
-  }
+	}
 
   public void delete(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
   {
@@ -423,4 +423,10 @@ public class URIHandlerImpl implements URIHandler
   {
     throw new UnsupportedOperationException();
   }
+
+	@Override
+	public void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback)
+	{
+	   throw new UnsupportedOperationException();
+	}
 }
