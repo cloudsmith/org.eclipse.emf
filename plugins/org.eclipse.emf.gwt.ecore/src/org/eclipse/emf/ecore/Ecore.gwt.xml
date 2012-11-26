@@ -4,9 +4,11 @@
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="org.eclipse.emf.common.Common" />
 	<source path=""/>
+	<super-source path="client"/>
 	<source path="impl"/>
 	<source path="plugin"/>
-	<source path="resource"/>
-	<source path="resource.impl"/>
+	<source path="resource">
+		<exclude name="impl/BinaryResourceImpl.java"/>
+	</source>
 	<source path="util"/>
 </module>
