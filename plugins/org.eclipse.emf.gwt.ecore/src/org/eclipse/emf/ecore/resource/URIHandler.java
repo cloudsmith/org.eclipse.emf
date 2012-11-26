@@ -21,7 +21,7 @@ import org.eclipse.emf.common.util.Callback;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.shared.GWT;
 
 /**
  * A handler for determining information about URI.

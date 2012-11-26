@@ -20,7 +20,7 @@ import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIHandler;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.shared.GWT;
 
 
 /**
