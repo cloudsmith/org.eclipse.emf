@@ -348,7 +348,7 @@ public class BinaryResourceImpl extends ResourceImpl
       featureMapEntryDataArrayBuffer[featureMapEntryDataArrayBufferCount] = values;
     }
 
-    protected enum FeatureKind
+    public enum FeatureKind
     {
       EOBJECT_CONTAINER,
       EOBJECT_CONTAINER_PROXY_RESOLVING,

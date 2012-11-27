@@ -11,7 +11,6 @@
 package org.eclipse.emf.ecore.resource.impl;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -977,51 +976,16 @@ public class ResourceImpl extends NotifierImpl implements Resource, Resource.Int
       response = new HashMap<Object, Object>();
     }
     URIConverter uriConverter = getURIConverter();
-    if (GWT.isClient())
+    ExtensibleURIConverterImpl.OptionsMap effectiveOptions = new ExtensibleURIConverterImpl.OptionsMap(URIConverter.OPTION_RESPONSE, response, options);
+    OutputStream outputStream = uriConverter.createOutputStream(getURI(), effectiveOptions);
+    try
     {
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      try
-      {
-        save(outputStream, options);
-      }
-      finally
-      {
-        outputStream.close();
-        byte[] bytes = outputStream.toByteArray();
-        final ExtensibleURIConverterImpl.OptionsMap effectiveOptions = new ExtensibleURIConverterImpl.OptionsMap(URIConverter.OPTION_RESPONSE, response, options);
-        uriConverter.store
-          (getURI(),
-           bytes,
-           effectiveOptions,
-           new Callback<Map<?,?>>()
-           {
-             public void onFailure(Throwable caught)
-             {
-               callback.onFailure(caught);
-             }
-
-             public void onSuccess(Map<?, ?> result)
-             {
-               Map<?, ?> response = (Map<?, ?>)result.get(URIConverter.OPTION_RESPONSE);
-               handleSaveResponse(response, effectiveOptions);
-               callback.onSuccess(ResourceImpl.this);
-             }
-           });
-      }
+      save(outputStream, options);
     }
-    else
+    finally
     {
-      ExtensibleURIConverterImpl.OptionsMap effectiveOptions = new ExtensibleURIConverterImpl.OptionsMap(URIConverter.OPTION_RESPONSE, response, options);
-      OutputStream outputStream = uriConverter.createOutputStream(getURI(), effectiveOptions);
-      try
-      {
-        save(outputStream, options);
-      }
-      finally
-      {
-        outputStream.close();
-        handleSaveResponse(response, effectiveOptions);
-      }
+      outputStream.close();
+      handleSaveResponse(response, effectiveOptions);
     }
   }
 

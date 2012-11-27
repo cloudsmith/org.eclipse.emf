@@ -72,6 +72,14 @@ public interface URIHandler
   void createInputStream(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback);
 
   /**
+   * TODO
+   * @param uri
+   * @param options
+   * @param callback
+   */
+	void createJSON(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback);
+
+  /**
    * Creates an output stream for the URI and returns it.
    * @param uri the URI for which to create the output stream.
    * @param options a map of options to influence the kind of stream that is returned; unrecognized options are ignored and <code>null</code> is permitted.
@@ -84,11 +92,21 @@ public interface URIHandler
   /**
    * TODO
    * @param uri
+   * @param json
+   * @param options
+   * @param callback
+   */
+  void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback);
+
+  /**
+   * TODO
+   * @param uri
    * @param bytes
    * @param options
    * @param callback
    */
   void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback);
+
 
   /**
    * Deletes the contents of the given URI. 

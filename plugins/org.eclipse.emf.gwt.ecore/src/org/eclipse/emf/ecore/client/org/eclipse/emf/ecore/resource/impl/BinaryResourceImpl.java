@@ -111,7 +111,7 @@ public class BinaryResourceImpl extends ResourceImpl
 
   public BinaryResourceImpl(URI uri)
   {
-  	super(uri);
+  	throw new UnsupportedOperationException();
   }
 
   public static class BinaryIO

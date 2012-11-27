@@ -28,7 +28,6 @@ import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.URIHandler;
 
-
 /**
  * A highly functional and extensible URI converter implementation.
  * <p>
@@ -179,11 +178,18 @@ public class ExtensibleURIConverterImpl implements URIConverter
     return createOutputStream(uri, null);
   }
 
+  public void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback)
+  {
+    URI normalizedURI = normalize(uri);
+    getURIHandler(normalizedURI).store(normalizedURI, json, new OptionsMap(OPTION_URI_CONVERTER, this, options), callback);
+  }
+
   public void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback)
   {
     URI normalizedURI = normalize(uri);
     getURIHandler(normalizedURI).store(normalizedURI, bytes, new OptionsMap(OPTION_URI_CONVERTER, this, options), callback);
   }
+
 
   public void delete(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
   {
@@ -309,6 +315,12 @@ public class ExtensibleURIConverterImpl implements URIConverter
   {
     URI normalizedURI = normalize(uri);
     getURIHandler(normalizedURI).createInputStream(normalizedURI, new OptionsMap(OPTION_URI_CONVERTER, this, options), callback);
+  }
+ 
+  public void createJSON(final URI uri, Map<?, ?> options, final Callback<Map<?, ?>> callback)
+  {
+    URI normalizedURI = normalize(uri);
+    getURIHandler(normalizedURI).createJSON(normalizedURI, options, callback);
   }
 
   public void delete(URI uri, Map<?, ?> options) throws IOException

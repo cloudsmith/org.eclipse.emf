@@ -8,7 +8,10 @@
 	<source path="impl"/>
 	<source path="plugin"/>
 	<source path="resource">
+		<exclude name="URIServiceCallback.java"/>
 		<exclude name="impl/BinaryResourceImpl.java"/>
+		<exclude name="impl/ResourceImpl.java"/>
+		<exclude name="impl/URIHandlerImpl.java"/>
 	</source>
 	<source path="util"/>
 </module>

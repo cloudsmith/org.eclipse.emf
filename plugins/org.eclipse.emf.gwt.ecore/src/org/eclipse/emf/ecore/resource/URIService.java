@@ -24,7 +24,7 @@ public interface URIService extends RemoteService
   String OPTION_SESSION = "SESSION";
 
   Map<?, ?> fetch(String uri, Map<?, ?> options);
-  Map<?, ?> store(String uri, byte[] bytes, Map<?, ?> options);
+  Map<?, ?> store(String uri, String json, Map<?, ?> options);
   Map<?, ?> delete(String uri, Map<?, ?> options);
   boolean exists(String uri, Map<?, ?> options);
   

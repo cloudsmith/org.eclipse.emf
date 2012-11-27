@@ -10,10 +10,13 @@
  */
 package org.eclipse.emf.ecore.resource.impl;
 
-
-import java.io.InputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +24,7 @@ import java.util.Set;
 import org.eclipse.emf.common.util.Callback;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.URIHandler;
 
@@ -87,12 +91,69 @@ public class URIHandlerImpl implements URIHandler
    */
   public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException
   {
-    return null;
-  }
-
-  public void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback)
-  {
-    callback.onSuccess(null);
+    try
+    {
+      URL url = new URL(uri.toString());
+      final URLConnection urlConnection = url.openConnection();
+      urlConnection.setDoOutput(true);
+      if (urlConnection instanceof HttpURLConnection)
+      {
+        final HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+        httpURLConnection.setRequestMethod("PUT");
+        return
+          new FilterOutputStream(urlConnection.getOutputStream())
+             {
+               @Override
+               public void close() throws IOException
+               {
+                 super.close();
+                 int responseCode = httpURLConnection.getResponseCode();
+                 switch (responseCode)
+                 {
+                   case HttpURLConnection.HTTP_OK:
+                   case HttpURLConnection.HTTP_CREATED:
+                   case HttpURLConnection.HTTP_NO_CONTENT:
+                   {
+                     break;
+                   }
+                   default:
+                   {
+                     throw new IOException("PUT failed with HTTP response code " + responseCode);
+                   }
+                 }
+               }
+             };
+      }
+      else
+      {
+        java.io.OutputStream result = urlConnection.getOutputStream();
+        final Map<Object, Object> response = getResponse(options);
+        if (response != null)
+        {
+          result = 
+            new FilterOutputStream(result)
+            {
+              @Override
+              public void close() throws IOException
+              {
+                try
+                {
+                  super.close();
+                }
+                finally
+                {
+                  response.put(URIConverter.RESPONSE_TIME_STAMP_PROPERTY, urlConnection.getLastModified());
+                }
+              }
+            };
+        }
+        return result;
+      }
+    }
+    catch (RuntimeException exception)
+    {
+      throw new Resource.IOWrappedException(exception);
+    }
   }
 
   /**
@@ -102,12 +163,22 @@ public class URIHandlerImpl implements URIHandler
    */
   public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException
   {
-    return null;
-  }
-
-  public void createInputStream(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
-  {
-    callback.onSuccess(null);
+    try
+    {
+      URL url = new URL(uri.toString());
+      final URLConnection urlConnection = url.openConnection();
+      java.io.InputStream result = urlConnection.getInputStream();
+      Map<Object, Object> response = getResponse(options);
+      if (response != null)
+      {
+        response.put(URIConverter.RESPONSE_TIME_STAMP_PROPERTY, urlConnection.getLastModified());
+      }
+      return result;
+    }
+    catch (RuntimeException exception)
+    {
+      throw new Resource.IOWrappedException(exception);
+    }
   }
 
   /**
@@ -115,12 +186,39 @@ public class URIHandlerImpl implements URIHandler
    */
   public void delete(URI uri, Map<?, ?> options) throws IOException
   {
-    //
-  }
-
-  public void delete(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
-  {
-    callback.onSuccess(null);
+    try
+    {
+      URL url = new URL(uri.toString());
+      URLConnection urlConnection = url.openConnection();
+      urlConnection.setDoOutput(true);
+      if (urlConnection instanceof HttpURLConnection)
+      {
+        final HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+        httpURLConnection.setRequestMethod("DELETE");
+        int responseCode = httpURLConnection.getResponseCode();
+        switch (responseCode)
+        {
+          case HttpURLConnection.HTTP_OK:
+          case HttpURLConnection.HTTP_ACCEPTED:
+          case HttpURLConnection.HTTP_NO_CONTENT:
+          {
+            break;
+          }
+          default:
+          {
+            throw new IOException("DELETE failed with HTTP response code " + responseCode);
+          }
+        }
+      }
+      else
+      {
+        throw new IOException("Delete is not supported for " + uri);
+      }
+    }
+    catch (RuntimeException exception)
+    {
+      throw new Resource.IOWrappedException(exception);
+    }
   }
 
   /**
@@ -146,10 +244,17 @@ public class URIHandlerImpl implements URIHandler
             }
             catch (IOException exception)
             {
-              throw exception;
+              inputStream =new InputStream()
+							{
+								public int read() throws IOException
+								{
+									return -1;
+								}
+							};
             }
             if (!inputStream.markSupported())
             {
+              // TODO
               // inputStream = new BufferedInputStream(inputStream);
             }
             inputStream.mark(Integer.MAX_VALUE);
@@ -198,21 +303,140 @@ public class URIHandlerImpl implements URIHandler
    */
   public boolean exists(URI uri, Map<?, ?> options)
   {
-    return false;
-  }
-
-  public void exists(URI uri, Map<?, ?> options, Callback<Boolean> callback)
-  {
-    callback.onSuccess(false);
+    try
+    {
+      URL url = new URL(uri.toString());
+      URLConnection urlConnection = url.openConnection();
+      if (urlConnection instanceof HttpURLConnection)
+      {
+        HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+        httpURLConnection.setRequestMethod("HEAD");
+        int responseCode = httpURLConnection.getResponseCode();
+        // TODO
+        // I'm concerned that folders will often return 401 or even 403.
+        // So should we consider something to exist even though access if unauthorized or forbidden?
+        //
+        return responseCode == HttpURLConnection.HTTP_OK;
+      }
+      else
+      {
+        java.io.InputStream inputStream = urlConnection.getInputStream();
+        inputStream.close();
+        return true;
+      }
+    }
+    catch (Throwable exception)
+    {
+      return false;
+    }
   }
 
   public Map<String, ?> getAttributes(URI uri, Map<?, ?> options)
   {
-    return null;
+    Map<String, Object> result = new HashMap<String, Object>();
+    Set<String> requestedAttributes = getRequestedAttributes(options);
+    try
+    {
+      URL url = new URL(uri.toString());
+      URLConnection urlConnection = null;
+      if (requestedAttributes == null || requestedAttributes.contains(URIConverter.ATTRIBUTE_READ_ONLY))
+      {
+        urlConnection = url.openConnection();
+        if (urlConnection instanceof HttpURLConnection)
+        {
+          HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+          httpURLConnection.setRequestMethod("OPTIONS");
+          int responseCode = httpURLConnection.getResponseCode();
+          if (responseCode == HttpURLConnection.HTTP_OK)
+          {
+            String allow = httpURLConnection.getHeaderField("Allow");
+            result.put(URIConverter.ATTRIBUTE_READ_ONLY, allow == null || !allow.contains("PUT"));
+          }
+          urlConnection = null;
+        }
+        else
+        {
+          result.put(URIConverter.ATTRIBUTE_READ_ONLY, true);
+        }
+      }
+
+      if (requestedAttributes == null || requestedAttributes.contains(URIConverter.ATTRIBUTE_TIME_STAMP))
+      {
+        if (urlConnection == null)
+        {
+          urlConnection = url.openConnection();
+          if (urlConnection instanceof HttpURLConnection)
+          {
+            HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+            httpURLConnection.setRequestMethod("HEAD");
+            httpURLConnection.getResponseCode();
+          }
+        }
+        if (urlConnection.getHeaderField("last-modified") != null)
+        {
+          result.put(URIConverter.ATTRIBUTE_TIME_STAMP, urlConnection.getLastModified());
+        }
+      }
+
+      if (requestedAttributes == null || requestedAttributes.contains(URIConverter.ATTRIBUTE_LENGTH))
+      {
+        if (urlConnection == null)
+        {
+          urlConnection = url.openConnection();
+          if (urlConnection instanceof HttpURLConnection)
+          {
+            HttpURLConnection httpURLConnection = (HttpURLConnection)urlConnection;
+            httpURLConnection.setRequestMethod("HEAD");
+            httpURLConnection.getResponseCode();
+          }
+        }
+        if (urlConnection.getHeaderField("content-length") != null)
+        {
+          result.put(URIConverter.ATTRIBUTE_LENGTH, urlConnection.getContentLength());
+        }
+      }
+    }
+    catch (IOException exception)
+    {
+      // Ignore exceptions.
+    }
+    return result;
   }
 
   public void setAttributes(URI uri, Map<String, ?> attributes, Map<?, ?> options) throws IOException
   {
     // We can't update any properties via just a URL connection.
   }
+  
+  public void createInputStream(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void createJSON(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
+	{
+    throw new UnsupportedOperationException();
+	}
+
+  public void delete(URI uri, Map<?, ?> options, Callback<Map<?, ?>> callback)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void exists(URI uri, Map<?, ?> options, Callback<Boolean> callback)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+	@Override
+	public void store(URI uri, String json, Map<?, ?> options, Callback<Map<?, ?>> callback)
+	{
+	   throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void store(URI uri, byte[] bytes, Map<?, ?> options, Callback<Map<?, ?>> callback)
+	{
+	   throw new UnsupportedOperationException();
+	}
 }
